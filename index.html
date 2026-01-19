@@ -1,81 +1,130 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Control de Pallets</title>
+<meta charset="UTF-8">
+<title>Control de Pallets</title>
 
-  <style>
-    * { box-sizing: border-box; }
+<style>
+* { box-sizing: border-box; font-family: Arial, sans-serif; }
 
-    body {
-      font-family: Arial, sans-serif;
-      background: #eef1f4;
-      margin: 0;
-      padding: 20px;
-    }
+body {
+  margin: 0;
+  background: #eef1f4;
+}
 
-    h1 {
-      background: #1976d2;
-      color: white;
-      text-align: center;
-      padding: 15px;
-      margin: -20px -20px 20px -20px;
-    }
+/* HEADER */
+header {
+  background: #1976d2;
+  color: white;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+}
 
-    h2 { text-align: center; }
+header button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 22px;
+  margin-right: 15px;
+}
 
-    form, .card, .panel {
-      background: white;
-      max-width: 650px;
-      margin: 15px auto;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
+/* SIDEBAR */
+#sidebar {
+  position: fixed;
+  top: 0;
+  left: -260px;
+  width: 260px;
+  height: 100%;
+  background: #263238;
+  color: white;
+  padding-top: 60px;
+  transition: 0.3s;
+  z-index: 1000;
+}
 
-    label {
-      font-weight: bold;
-      margin-top: 10px;
-      display: block;
-    }
+#sidebar button {
+  width: 100%;
+  padding: 15px;
+  background: none;
+  border: none;
+  color: white;
+  text-align: left;
+  font-size: 16px;
+}
 
-    input, select, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      font-size: 15px;
-    }
+#sidebar button:hover {
+  background: #37474f;
+}
 
-    button {
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-    }
+/* CONTENT */
+main {
+  padding: 20px;
+}
 
-    .btn-primary { background: #1976d2; color: white; }
-    .btn-secondary { background: #455a64; color: white; margin-top: 5px; }
-    .btn-mover { background: #f57c00; color: white; margin-top: 5px; }
-    .btn-salida { background: #d32f2f; color: white; margin-top: 5px; }
+.section {
+  display: none;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+}
 
-    .estado-almacenado { border-left: 6px solid #2e7d32; }
-    .estado-salido { border-left: 6px solid #c62828; opacity: 0.9; }
+.section.active {
+  display: block;
+}
 
-    .acciones { margin-top: 10px; }
-  </style>
+.card {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  border-left: 6px solid #2e7d32;
+}
+
+.salido {
+  border-left-color: #c62828;
+  opacity: 0.9;
+}
+
+input, select, button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 8px;
+}
+
+.btn {
+  background: #1976d2;
+  color: white;
+  border: none;
+  margin-top: 10px;
+}
+
+.btn-mover { background: #f57c00; }
+.btn-salida { background: #d32f2f; }
+</style>
 </head>
 
 <body>
 
-<h1>CONTROL DE PALLETS</h1>
+<header>
+  <button onclick="toggleMenu()">☰</button>
+  <h2>CONTROL DE PALLETS</h2>
+</header>
 
-<form id="formPallet">
-  <h2>Registrar Pallet</h2>
+<div id="sidebar">
+  <button onclick="showSection('registro')">📦 Registrar Pallet</button>
+  <button onclick="showSection('almacenados')">📍 Almacenados</button>
+  <button onclick="showSection('rack')">🧱 Por Rack</button>
+  <button onclick="showSection('salidos')">🚚 Salidos</button>
+</div>
 
-  <label>N° de Pallet</label>
-  <input type="number" id="numero">
+<main>
 
-  <label>Producto</label>
+<!-- REGISTRO -->
+<div id="registro" class="section active">
+  <h3>Registrar Pallet</h3>
+
+  <input id="numero" type="number" placeholder="N° Pallet">
   <select id="producto">
     <option>Palta</option>
     <option>Mango</option>
@@ -83,141 +132,115 @@
     <option>Arándano</option>
     <option>Fresa</option>
   </select>
+  <input id="detalle" placeholder="Detalle / Presentación">
+  <input id="cajas" type="number" placeholder="Cajas">
+  <input id="rack" placeholder="Rack">
+  <input id="riel" type="number" placeholder="Riel">
+  <input id="nivel" type="number" placeholder="Nivel">
+  <input id="fondo" type="number" placeholder="Fondo">
 
-  <label>Detalle / Presentación</label>
-  <input type="text" id="detalle" placeholder="Ej: 20x20, Slices, Mitades">
-
-  <label>Cantidad (cajas)</label>
-  <input type="number" id="cajas">
-
-  <label>Rack</label>
-  <input type="text" id="rack">
-
-  <label>Riel</label>
-  <input type="number" id="riel">
-
-  <label>Nivel</label>
-  <input type="number" id="nivel">
-
-  <label>Fondo</label>
-  <input type="number" id="fondo">
-
-  <button class="btn-primary" type="submit">GUARDAR PALLET</button>
-</form>
-
-<div class="panel">
-  <h2>Buscar / Filtrar</h2>
-
-  <label>Buscar por N° de Pallet</label>
-  <input type="number" id="buscarNumero">
-  <button class="btn-secondary" onclick="buscarPallet()">Buscar</button>
-
-  <label>Filtrar por Rack</label>
-  <input type="text" id="filtroRack" placeholder="Ej: A, B, C">
-  <button class="btn-secondary" onclick="filtrarPorRack()">Ver Rack</button>
-
-  <button class="btn-secondary" onclick="mostrarAlmacenados()">Ver almacenados</button>
-  <button class="btn-secondary" onclick="mostrarSalidos()">Ver salidos</button>
+  <button class="btn" onclick="guardar()">Guardar</button>
 </div>
 
-<h2>Listado de Pallets</h2>
-<div id="listado"></div>
+<!-- ALMACENADOS -->
+<div id="almacenados" class="section">
+  <h3>Pallets Almacenados</h3>
+  <div id="listadoAlmacenados"></div>
+</div>
+
+<!-- POR RACK -->
+<div id="rack" class="section">
+  <h3>Buscar por Rack</h3>
+  <input id="rackFiltro" placeholder="Ej: A">
+  <button class="btn" onclick="verPorRack()">Ver Rack</button>
+  <div id="listadoRack"></div>
+</div>
+
+<!-- SALIDOS -->
+<div id="salidos" class="section">
+  <h3>Pallets Salidos</h3>
+  <div id="listadoSalidos"></div>
+</div>
+
+</main>
 
 <script>
 let pallets = JSON.parse(localStorage.getItem("pallets")) || [];
 
-document.getElementById("formPallet").addEventListener("submit", function(e) {
-  e.preventDefault();
+function toggleMenu() {
+  const s = document.getElementById("sidebar");
+  s.style.left = s.style.left === "0px" ? "-260px" : "0px";
+}
 
-  const num = Number(numero.value);
-  if (pallets.some(p => p.numero === num)) {
-    alert("El pallet ya existe");
-    return;
-  }
+function showSection(id) {
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  toggleMenu();
+  render();
+}
 
+function guardar() {
   pallets.push({
-    numero: num,
+    numero: numero.value,
     producto: producto.value,
     detalle: detalle.value,
-    cajas: Number(cajas.value),
+    cajas: cajas.value,
     rack: rack.value.toUpperCase(),
-    riel: Number(riel.value),
-    nivel: Number(nivel.value),
-    fondo: Number(fondo.value),
+    riel: riel.value,
+    nivel: nivel.value,
+    fondo: fondo.value,
     estado: "almacenado"
   });
-
   localStorage.setItem("pallets", JSON.stringify(pallets));
-  e.target.reset();
-  mostrarAlmacenados();
-});
-
-function render(lista) {
-  const cont = document.getElementById("listado");
-  cont.innerHTML = "";
-
-  if (lista.length === 0) {
-    cont.innerHTML = "<p style='text-align:center'>Sin registros</p>";
-    return;
-  }
-
-  lista.forEach(p => {
-    cont.innerHTML += `
-      <div class="card estado-${p.estado}">
-        <strong>Pallet ${p.numero}</strong><br>
-        ${p.producto}${p.detalle ? " (" + p.detalle + ")" : ""} | ${p.cajas} cajas<br>
-        Ubicación: Rack ${p.rack} – Riel ${p.riel} – Nivel ${p.nivel} – Fondo ${p.fondo}
-        <div class="acciones">
-          ${p.estado === "almacenado" ? `
-            <button class="btn-mover" onclick="moverPallet(${p.numero})">Mover</button>
-            <button class="btn-salida" onclick="salidaPallet(${p.numero})">Salida</button>
-          ` : `<em>PALLET SALIDO</em>`}
-        </div>
-      </div>
-    `;
-  });
+  alert("Pallet registrado");
 }
 
-function mostrarAlmacenados() {
-  render(pallets.filter(p => p.estado === "almacenado"));
+function render() {
+  document.getElementById("listadoAlmacenados").innerHTML =
+    pallets.filter(p => p.estado === "almacenado")
+    .map(p => card(p)).join("");
+
+  document.getElementById("listadoSalidos").innerHTML =
+    pallets.filter(p => p.estado === "salido")
+    .map(p => card(p,true)).join("");
 }
 
-function mostrarSalidos() {
-  render(pallets.filter(p => p.estado === "salido"));
+function card(p, salido=false) {
+  return `
+    <div class="card ${salido ? 'salido':''}">
+      <strong>Pallet ${p.numero}</strong><br>
+      ${p.producto} ${p.detalle}<br>
+      Rack ${p.rack} - Riel ${p.riel} - Nivel ${p.nivel} - Fondo ${p.fondo}
+      ${!salido ? `
+      <button class="btn-mover" onclick="mover(${p.numero})">Mover</button>
+      <button class="btn-salida" onclick="salida(${p.numero})">Salida</button>` : ''}
+    </div>`;
 }
 
-function buscarPallet() {
-  const n = Number(buscarNumero.value);
-  render(pallets.filter(p => p.numero === n));
-}
-
-function filtrarPorRack() {
-  const r = filtroRack.value.toUpperCase();
-  render(pallets.filter(p => p.rack === r && p.estado === "almacenado"));
-}
-
-function moverPallet(n) {
-  const p = pallets.find(p => p.numero === n);
-  if (!p) return;
-
-  p.rack = prompt("Nuevo Rack:", p.rack).toUpperCase();
-  p.riel = Number(prompt("Nuevo Riel:", p.riel));
-  p.nivel = Number(prompt("Nuevo Nivel:", p.nivel));
-  p.fondo = Number(prompt("Nuevo Fondo:", p.fondo));
-
+function mover(n) {
+  const p = pallets.find(p => p.numero == n);
+  p.rack = prompt("Rack:", p.rack);
+  p.riel = prompt("Riel:", p.riel);
+  p.nivel = prompt("Nivel:", p.nivel);
+  p.fondo = prompt("Fondo:", p.fondo);
   localStorage.setItem("pallets", JSON.stringify(pallets));
-  mostrarAlmacenados();
+  render();
 }
 
-function salidaPallet(n) {
-  if (!confirm("Confirmar salida del pallet " + n + "?")) return;
-  const p = pallets.find(p => p.numero === n);
-  p.estado = "salido";
+function salida(n) {
+  pallets.find(p => p.numero == n).estado = "salido";
   localStorage.setItem("pallets", JSON.stringify(pallets));
-  mostrarAlmacenados();
+  render();
 }
 
-mostrarAlmacenados();
+function verPorRack() {
+  const r = rackFiltro.value.toUpperCase();
+  document.getElementById("listadoRack").innerHTML =
+    pallets.filter(p => p.rack === r && p.estado === "almacenado")
+    .map(p => card(p)).join("");
+}
+
+render();
 </script>
 
 </body>
