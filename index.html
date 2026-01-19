@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Control de Pallets</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  padding: 20px;
+}
+h1, h2 {
+  text-align: center;
+}
+form, .card, .panel {
+  background: white;
+  max-width: 700px;
+  margin: 15px auto;
+  padding: 20px;
+  border-radius: 8px;
+}
+label {
+  font-weight: bold;
+  display: block;
+  margin-top: 10px;
+}
+input, select, button {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+}
+button {
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+.btn-primary { background: #1976d2; color: white; }
+.btn-secondary { background: #455a64; color: white; }
+.btn-mover { background: #f57c00; color: white; }
+.btn-salida { background: #d32f2f; color: white; }
+.almacenado { border-left: 6px solid #2e7d32; }
+.salido { border-left: 6px solid #c62828; opacity: 0.9; }
+</style>
+</head>
+
+<body>
+
+<h1>CONTROL DE PALLETS</h1>
+
+<form id="formPallet">
+  <h2>Registrar Pallet</h2>
+
+  <label>N° Pallet</label>
+  <input type="number" id="numero">
+
+  <label>Producto</label>
+  <select id="producto">
+    <option>Palta</option>
+    <option>Mango</option>
+    <option>Uva</option>
+    <option>Arándano</option>
+    <option>Fresa</option>
+  </select>
+
+  <label>Detalle / Presentación</label>
+  <input id="detalle">
+
+  <label>Cajas</label>
+  <input type="number" id="cajas">
+
+  <label>Rack</label>
+  <input id="rack">
+
+  <label>Riel</label>
+  <input type="number" id="riel">
+
+  <label>Nivel</label>
+  <input type="number" id="nivel">
+
+  <label>Fondo</label>
+  <input type="number" id="fondo">
+
+  <button class="btn-primary" type="submit">Guardar Pallet</button>
+</form>
+
+<div class="panel">
+  <h2>Buscar / Filtrar</h2>
+
+  <label>Buscar por N° Pallet</label>
+  <input type="number" id="buscarNumero">
+  <button class="btn-secondary" onclick="buscarPallet()">Buscar</button>
+
+  <label>Filtrar por Rack</label>
+  <input id="filtroRack" placeholder="Ej: A">
+  <button class="btn-secondary" onclick="filtrarPorRack()">Ver Rack</button>
+
+  <button class="btn-secondary" onclick="mostrarAlmacenados()">Ver Almacenados</button>
+  <button class="btn-secondary" onclick="mostrarSalidos()">Ver Salidos</button>
+</div>
+
+<h2>Listado</h2>
+<div id="listado"></div>
+
+<script>
+let pallets = JSON.parse(localStorage.getItem("pallets")) || [];
+
+document.getElementById("formPallet").addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  const num = Number(numero.value);
+  if (pallets.some(p => p.numero === num)) {
+    alert("El pallet ya existe");
+    return;
+  }
+
+  pallets.push({
+    numero: num,
+    producto: producto.value,
+    detalle: detalle.value,
+    cajas: Number(cajas.value),
+    rack: rack.value.toUpperCase(),
+    riel: Number(riel.value),
+    nivel: Number(nivel.value),
+    fondo: Number(fondo.value),
+    estado: "almacenado"
+  });
+
+  localStorage.setItem("pallets", JSON.stringify(pallets));
+  e.target.reset();
+  mostrarAlmacenados();
+});
+
+function render(lista, esSalida=false) {
+  listado.innerHTML = "";
+  if (lista.length === 0) {
+    listado.innerHTML = "<p style='text-align:center'>Sin registros</p>";
+    return;
+  }
+
+  lista.forEach(p => {
+    listado.innerHTML += `
+      <div class="card ${p.estado === "salido" ? "salido":"almacenado"}">
+        <strong>Pallet ${p.numero}</strong><br>
+        ${p.producto}${p.detalle ? " ("+p.detalle+")":""} | ${p.cajas} cajas<br>
+        Ubicación: Rack ${p.rack} – Riel ${p.riel} – Nivel ${p.nivel} – Fondo ${p.fondo}<br>
+        ${!esSalida ? `
+          <button class="btn-mover" onclick="mover(${p.numero})">Mover</button>
+          <button class="btn-salida" onclick="salida(${p.numero})">Salida</button>
+        ` : "<em>PALLET SALIDO</em>"}
+      </div>
+    `;
+  });
+}
+
+function mostrarAlmacenados() {
+  render(pallets.filter(p => p.estado === "almacenado"));
+}
+
+function mostrarSalidos() {
+  render(pallets.filter(p => p.estado === "salido"), true);
+}
+
+function buscarPallet() {
+  const n = Number(buscarNumero.value);
+  render(pallets.filter(p => p.numero === n));
+}
+
+function filtrarPorRack() {
+  const r = filtroRack.value.toUpperCase();
+  render(pallets.filter(p => p.rack === r && p.estado === "almacenado"));
+}
+
+function mover(n) {
+  const p = pallets.find(p => p.numero === n);
+  p.rack = prompt("Rack:", p.rack).toUpperCase();
+  p.riel = prompt("Riel:", p.riel);
+  p.nivel = prompt("Nivel:", p.nivel);
+  p.fondo = prompt("Fondo:", p.fondo);
+  localStorage.setItem("pallets", JSON.stringify(pallets));
+  mostrarAlmacenados();
+}
+
+function salida(n) {
+  if (!confirm("Confirmar salida del pallet " + n + "?")) return;
+  pallets.find(p => p.numero === n).estado = "salido";
+  localStorage.setItem("pallets", JSON.stringify(pallets));
+  mostrarAlmacenados();
+}
+
+mostrarAlmacenados();
+</script>
+
+</body>
+</html>
